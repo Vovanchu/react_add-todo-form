@@ -1,32 +1,31 @@
-import { UserInfo } from '../UserInfo';
-
-type User = {
+interface User {
   id: number;
   name: string;
   username: string;
   email: string;
-};
+}
 
-type Todo = {
+interface Todo {
   id: number;
   title: string;
   completed: boolean;
   userId: number;
-  user?: User; // Додаємо опціональне поле user
-};
+  user: User;
+}
 
 interface TodoInfoProps {
-  todo: Todo; // Приймаємо тільки todo, який може містити user
+  todo: Todo;
 }
 
 export const TodoInfo = ({ todo }: TodoInfoProps) => {
   return (
     <article
-      data-id={todo.id}
       className={`TodoInfo ${todo.completed ? 'TodoInfo--completed' : ''}`}
     >
       <h2 className="TodoInfo__title">{todo.title}</h2>
-      <UserInfo user={todo.user} /> {/* Передаємо user з todo */}
+      <a className="UserInfo" href={`mailto:${todo.user.email}`}>
+        {todo.user.name}
+      </a>
     </article>
   );
 };

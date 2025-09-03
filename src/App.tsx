@@ -5,39 +5,51 @@ import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
 import { TodoList } from './components/TodoList';
 
-// Типізація для Todo
-interface Todo {
+type User = {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+};
+
+type Todo = {
   id: number;
   title: string;
   completed: boolean;
   userId: number;
-}
+  user: User;
+};
 
 export const App = () => {
-  const [todos, setTodos] = useState<Todo[]>(todosFromServer);
+  // Додаємо user до кожного todo і фільтруємо ті, де user знайдений
+  const initialTodos = todosFromServer
+    .map(todo => {
+      const user = usersFromServer.find(userr => userr.id === todo.userId);
 
+      return user ? { ...todo, user } : null;
+    })
+    .filter(Boolean) as Todo[]; // Видаляємо todos без user
+
+  const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [titleError, setTitleError] = useState('');
   const [userError, setUserError] = useState('');
   const [title, setTitle] = useState('');
   const [userId, setUserId] = useState('0');
 
-  // Обробники зміни значень
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-    // Одразу скидаємо помилку, якщо поле більше не порожнє
-    if (e.target.value.trim()) {
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value);
+    if (event.target.value.trim()) {
       setTitleError('');
     }
   };
 
-  const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setUserId(e.target.value);
-    if (e.target.value !== '0') {
+  const handleUserChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setUserId(event.target.value);
+    if (event.target.value !== '0') {
       setUserError('');
     }
   };
 
-  // Валідація при відправленні форми
   const validateForm = () => {
     let isValid = true;
 
@@ -46,12 +58,6 @@ export const App = () => {
       isValid = false;
     }
 
-    if (!title.trim()) {
-      setTitleError('Please enter a title');
-      isValid = false;
-    }
-
-    // Змінено з '0' на '' для коректної перевірки
     if (userId === '0') {
       setUserError('Please choose a user');
       isValid = false;
@@ -60,29 +66,45 @@ export const App = () => {
     return isValid;
   };
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
     if (validateForm()) {
+      const selectedUser = usersFromServer.find(
+        user => user.id.toString() === userId,
+      );
+
+      // Гарантуємо, що user знайдений
+      if (!selectedUser) {
+        setUserError('Selected user not found');
+
+        return;
+      }
+
       const newTodoId =
         todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) + 1 : 1;
 
-      // Створюємо новий todo
-      const newTodo = {
+      // Створюємо новий todo з обов'язковим user об'єктом
+      const newTodo: Todo = {
         id: newTodoId,
-        title,
+        title: title.trim(),
         completed: false,
         userId: Number(userId),
+        user: selectedUser, // Обов'язково додаємо user
       };
 
-      // Оновлюємо стан, додаючи новий todo
       setTodos(prevTodos => [...prevTodos, newTodo]);
-
-      // Скидаємо поля форми
       setTitle('');
       setUserId('0');
     }
   };
+
+  // Перевіряємо, чи всі todos мають user
+  const allTodosHaveUsers = todos.every(todo => todo.user);
+
+  if (!allTodosHaveUsers) {
+    return <div>Loading todos...</div>;
+  }
 
   return (
     <div className="App">
@@ -111,10 +133,10 @@ export const App = () => {
 
           <select
             data-cy="userSelect"
-            value={userId}
+            value={userId || 0}
             onChange={handleUserChange}
           >
-            <option value="0" disabled selected>
+            <option value="0" disabled>
               Choose a user
             </option>
 
@@ -133,7 +155,7 @@ export const App = () => {
         </button>
       </form>
 
-      <TodoList todos={todos} users={usersFromServer} />
+      <TodoList todos={todos} />
     </div>
   );
 };

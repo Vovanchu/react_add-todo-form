@@ -1,39 +1,30 @@
 import { TodoInfo } from '../TodoInfo/TodoInfo';
 
-type User = {
+interface User {
   id: number;
   name: string;
   username: string;
   email: string;
-};
+}
 
-type Todo = {
+interface Todo {
   id: number;
   title: string;
   completed: boolean;
   userId: number;
-  user?: User; // Додаємо опціональне поле user
-};
-
-interface AppProps {
-  todos: Todo[];
-  users?: User[]; // Робимо опціональним
+  user: User; // user обов'язковий
 }
 
-export const TodoList = ({ todos, users = [] }: AppProps) => {
+interface AppProps {
+  todos: Todo[]; // тільки todos, без users
+}
+
+export const TodoList = ({ todos }: AppProps) => {
   return (
     <section className="TodoList">
-      {todos.map(todo => {
-        // Використовуємо user з todo, якщо він є, інакше шукаємо в users
-        const user = todo.user || users.find(userr => userr.id === todo.userId);
-
-        const todoWithUser = {
-          ...todo,
-          user,
-        };
-
-        return <TodoInfo key={todo.id} todo={todoWithUser} />;
-      })}
+      {todos.map(todo => (
+        <TodoInfo key={todo.id} todo={todo} />
+      ))}
     </section>
   );
 };
