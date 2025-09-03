@@ -1,19 +1,5 @@
 import { UserInfo } from '../UserInfo';
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-}
-
-interface Todo {
-  id: number;
-  title: string;
-  completed: boolean;
-  userId: number;
-  user: User;
-}
+import { Todo } from '../../types';
 
 interface TodoInfoProps {
   todo: Todo;
@@ -22,6 +8,7 @@ interface TodoInfoProps {
 export const TodoInfo = ({ todo }: TodoInfoProps) => {
   return (
     <article
+      data-id={todo.id}
       className={`TodoInfo ${todo.completed ? 'TodoInfo--completed' : ''}`}
     >
       <h2 className="TodoInfo__title">{todo.title}</h2>

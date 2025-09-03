@@ -4,31 +4,16 @@ import React, { useState } from 'react';
 import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
 import { TodoList } from './components/TodoList';
-
-type User = {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-};
-
-type Todo = {
-  id: number;
-  title: string;
-  completed: boolean;
-  userId: number;
-  user: User;
-};
+import { Todo } from './types';
 
 export const App = () => {
-  // Додаємо user до кожного todo і фільтруємо ті, де user знайдений
   const initialTodos = todosFromServer
     .map(todo => {
       const user = usersFromServer.find(userr => userr.id === todo.userId);
 
       return user ? { ...todo, user } : null;
     })
-    .filter(Boolean) as Todo[]; // Видаляємо todos без user
+    .filter(Boolean) as Todo[];
 
   const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [titleError, setTitleError] = useState('');

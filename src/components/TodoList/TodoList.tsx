@@ -1,22 +1,8 @@
 import { TodoInfo } from '../TodoInfo/TodoInfo';
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-}
-
-interface Todo {
-  id: number;
-  title: string;
-  completed: boolean;
-  userId: number;
-  user: User; // user обов'язковий
-}
+import { Todo } from '../../types';
 
 interface AppProps {
-  todos: Todo[]; // тільки todos, без users
+  todos: Todo[];
 }
 
 export const TodoList = ({ todos }: AppProps) => {
