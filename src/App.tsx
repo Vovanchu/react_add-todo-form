@@ -22,8 +22,11 @@ export const App = () => {
   const [userId, setUserId] = useState('0');
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
-    if (event.target.value.trim()) {
+    const value = event.target.value;
+
+    setTitle(value.replace(/[^a-zA-Z0-9а-яА-ЯїЇіІєЄґҐ ]/g, ''));
+
+    if (value.trim()) {
       setTitleError('');
     }
   };
